@@ -25,6 +25,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,11 +36,22 @@ public class Animatica {
 
     public static final AnimaticaConfig CONFIG = new AnimaticaConfig();
 
+    private static long time = 0;
+
     public Animatica() {
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, (TickEvent.ClientTickEvent event) -> {
-            if (event.phase == TickEvent.Phase.START) AnimationLoader.INSTANCE.tickTextures();
+            if (event.phase == TickEvent.Phase.START) time++;
         });
 
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterClientReloadListenersEvent event)-> event.registerReloadListener(AnimationLoader.INSTANCE));
+        FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterClientReloadListenersEvent event) ->
+                event.registerReloadListener(AnimationLoader.INSTANCE));
+    }
+
+    public static long getTime() {
+        return time;
+    }
+
+    public static Identifier id(String path) {
+        return new Identifier(NAMESPACE, path);
     }
 }

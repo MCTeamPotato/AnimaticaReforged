@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-// Allows invalid characters in paths to support packs with extremely outdated formatting (because OptiFine does too)
+// The bane of everyone's existence
 @Mixin(Identifier.class)
 public class IdentifierMixin {
     @Inject(method = "<init>([Ljava/lang/String;)V", at = @At("TAIL"))

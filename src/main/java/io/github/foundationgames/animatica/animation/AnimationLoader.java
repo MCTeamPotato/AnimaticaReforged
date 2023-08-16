@@ -17,26 +17,22 @@
  */
 package io.github.foundationgames.animatica.animation;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.Flags;
+import io.github.foundationgames.animatica.util.Utilities;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.Resource;
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public final class AnimationLoader implements SynchronousResourceReloader {
     public static final String[] ANIM_PATHS = {
@@ -44,53 +40,40 @@ public final class AnimationLoader implements SynchronousResourceReloader {
             "mcpatcher/anim",
             "optifine/anim"
     };
-
     public static final AnimationLoader INSTANCE = new AnimationLoader();
 
-    private final Map<Identifier, Identifier> animationIds = new HashMap<>();
-    private final Set<AnimatedTexture> animatedTextures = new HashSet<>();
+    private final Map<Identifier, BakedTextureAnimation> animatedTextures = new HashMap<>();
 
     private AnimationLoader() {
     }
 
-    private static void findAllMCPAnimations(ResourceManager manager, BiConsumer<Identifier, Resource> action) {
+    private static void findAllMCPAnimations(ResourceManager manager, Consumer<Identifier> action) {
         for (var path : ANIM_PATHS) {
-            manager.findResources(path, p -> p.getPath().endsWith(".properties")).forEach(action);
+            manager.findResources(path, p -> p.endsWith(".properties")).forEach(action);
         }
     }
 
-    public @Nullable Identifier getAnimationId(Identifier id) {
-        return animationIds.get(id);
-    }
-
-    public void tickTextures() {
-        if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(this::tickTextures);
-        } else {
-            for (var texture : animatedTextures) {
-                texture.tick();
-            }
-        }
+    public BakedTextureAnimation getAnimation(Identifier id) {
+        return animatedTextures.get(id);
     }
 
     @Override
     public void reload(ResourceManager manager) {
-        this.animatedTextures.clear();
-        this.animationIds.clear();
-
         if (!Animatica.CONFIG.animatedTextures) {
+            this.animatedTextures.clear();
             return;
         }
 
         Flags.ALLOW_INVALID_ID_CHARS = true;
 
+        this.animatedTextures.clear();
         var animations = new HashMap<Identifier, List<AnimationMeta>>();
 
-        findAllMCPAnimations(manager, (id, resource) -> {
+        findAllMCPAnimations(manager, id -> {
             try {
-                try (var resourceInputStream = resource.getInputStream()) {
+                try (var resource = manager.getResource(id).getInputStream()) {
                     var ppt = new Properties();
-                    ppt.load(resourceInputStream);
+                    ppt.load(resource);
 
                     var anim = AnimationMeta.of(id, ppt);
 
@@ -103,16 +86,56 @@ public final class AnimationLoader implements SynchronousResourceReloader {
             }
         });
 
+        int[] totalSize = {0};
+
         for (var targetId : animations.keySet()) {
-            AnimatedTexture.tryCreate(manager, targetId, animations.get(targetId))
-                    .ifPresent(tex -> {
-                        var animId = new Identifier(targetId.getNamespace(), targetId.getPath() + "-anim");
-                        this.animationIds.put(targetId, animId);
-                        this.animatedTextures.add(tex);
-                        tex.registerTexture(MinecraftClient.getInstance().getTextureManager(), manager, animId, MinecraftClient.getInstance());
-                    });
+            if (Animatica.CONFIG.safeMode) {
+                try {
+                    debugAnimation(totalSize, manager, targetId, animations.get(targetId));
+                } catch (IOException e) {
+                    Animatica.LOG.error("Error printing Safe Mode debug for animation {}\n {}: {}", targetId, e.getClass().getName(), e.getMessage());
+                }
+            } else this.animatedTextures.put(targetId, BakedTextureAnimation.bake(manager, targetId, animations.get(targetId)));
+        }
+
+        if (Animatica.CONFIG.safeMode) {
+            Animatica.LOG.info("=== ESTIMATED TOTAL ANIMATION SIZE: {} BYTES ===", totalSize[0]);
         }
 
         Flags.ALLOW_INVALID_ID_CHARS = false;
+    }
+
+    public static void debugAnimation(int[] totalSize, ResourceManager manager, Identifier targetTex, List<AnimationMeta> anims) throws IOException {
+        int[] frameCounts = new int[anims.size()];
+        int frameWidth;
+        int frameHeight;
+        int bytesPerPix;
+
+        try (var target = manager.getResource(targetTex).getInputStream()) {
+            try (var img = NativeImage.read(target)) {
+                frameWidth = img.getWidth();
+                frameHeight = img.getHeight();
+                bytesPerPix = img.getFormat().getChannelCount();
+            }
+        }
+
+        for (int i = 0; i < anims.size(); i++) {
+            var meta = anims.get(i);
+
+            try (var source = manager.getResource(meta.source()).getInputStream()) {
+                var tex = NativeImage.read(source);
+                frameCounts[i] = Math.max((int)Math.floor((float) tex.getHeight() / meta.height()), meta.getGreatestUsedFrame() + 1);
+            }
+        }
+
+        int frameCount = Utilities.lcm(frameCounts);
+        int animSizeEstimate = frameWidth * frameHeight * bytesPerPix * frameCount;
+
+        totalSize[0] += animSizeEstimate;
+
+        Animatica.LOG.info("--- ANIMATION DEBUG FOR TEXTURE '{}' ---", targetTex.toString());
+        Animatica.LOG.info(" - Total Compiled Frame Count: {}", frameCount);
+        Animatica.LOG.info(" - Frame Dimensions: {}px by {}px", frameWidth, frameHeight);
+        Animatica.LOG.info(" - Estimated Animation Size: {} BYTES", animSizeEstimate);
     }
 }

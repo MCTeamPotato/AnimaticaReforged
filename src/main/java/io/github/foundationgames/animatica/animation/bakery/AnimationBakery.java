@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.foundationgames.animatica.animation;
+package io.github.foundationgames.animatica.animation.bakery;
 
 import com.google.common.collect.ImmutableList;
 import io.github.foundationgames.animatica.Animatica;
+import io.github.foundationgames.animatica.animation.AnimationMeta;
 import io.github.foundationgames.animatica.util.TextureUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.resource.ResourceManager;
@@ -27,57 +29,44 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Optional;
 
-public class AnimatedTexture extends NativeImageBackedTexture {
-    public final Animation[] anims;
-    private final NativeImage original;
+public class AnimationBakery implements AutoCloseable {
+    public final Baking[] anims;
+    private final NativeImage target;
     private int frame = 0;
+    private final Deque<Identifier> frameIds = new ArrayDeque<>();
+    private final Identifier targetTexId;
 
-    public static Optional<AnimatedTexture> tryCreate(ResourceManager resources, Identifier targetTexId, List<AnimationMeta> anims) {
-        try (var targetTexResource = resources.getResourceOrThrow(targetTexId).getInputStream()) {
-            return Optional.of(new AnimatedTexture(resources, anims, NativeImage.read(targetTexResource)));
-        } catch (IOException e) { Animatica.LOG.error(e); }
-
-        return Optional.empty();
-    }
-
-    public AnimatedTexture(ResourceManager resources, List<AnimationMeta> metas, NativeImage image) throws IOException {
-        super(new NativeImage(image.getFormat(), image.getWidth(), image.getHeight(), true));
-
-        this.anims = new Animation[metas.size()];
+    public AnimationBakery(ResourceManager resources, Identifier targetTex, List<AnimationMeta> metas) throws IOException {
+        this.anims = new Baking[metas.size()];
         for (int i = 0; i < metas.size(); i++) {
-            this.anims[i] = new Animation(metas.get(i), resources);
+            this.anims[i] = new Baking(metas.get(i), resources);
         }
-        this.original = image;
 
-        updateAndDraw(this.getImage(), true);
-        this.upload();
+        try (var target = resources.getResource(targetTex).getInputStream()) {
+            this.target = NativeImage.read(target);
+        }
+
+        this.targetTexId = targetTex;
     }
 
-    public boolean canLoop() {
+    public boolean hasNext() {
         for (var anim : anims) {
             if (!anim.isOnFrameZero()) {
-                return false;
+                return true;
             }
         }
-        // All animations for this texture are at zero again, so the frame counter can be reset
-        return true;
+        return false;
     }
 
-    public boolean updateAndDraw(NativeImage image, boolean force) {
-        boolean changed = false;
+    public void advance() {
+        var textures = MinecraftClient.getInstance().getTextureManager();
 
-        if (canLoop()) {
-            if (frame > 0) {
-                frame = 0;
-            }
-        } else if (frame <= 0) {
-            changed = true;
-        }
-
+        boolean changed = frame <= 0;
         for (var anim : anims) {
             if (anim.isChanged()) {
                 changed = true;
@@ -85,46 +74,52 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             }
         }
 
-        if (changed || force) {
-            image.copyFrom(this.original);
+        if (changed) {
+            var frameImg = new NativeImage(target.getFormat(), target.getWidth(), target.getHeight(), false);
+            frameImg.copyFrom(target);
 
             Phase phase;
             for (var anim : anims) {
                 phase = anim.getCurrentPhase();
                 if (phase instanceof InterpolatedPhase iPhase) {
-                    TextureUtil.blendCopy(anim.sourceTexture, 0, iPhase.prevV, 0, iPhase.v, anim.width, anim.height, image, anim.targetX, anim.targetY, iPhase.blend.getBlend(anim.getPhaseFrame()));
+                    TextureUtil.blendCopy(anim.sourceTexture, 0, iPhase.prevV, 0, iPhase.v, anim.width, anim.height, frameImg, anim.targetX, anim.targetY, iPhase.blend.getBlend(anim.getPhaseFrame()));
                 } else {
-                    TextureUtil.copy(anim.sourceTexture, 0, phase.v, anim.width, anim.height, image, anim.targetX, anim.targetY);
+                    TextureUtil.copy(anim.sourceTexture, 0, phase.v, anim.width, anim.height, frameImg, anim.targetX, anim.targetY);
                 }
             }
+
+            var id = new Identifier(targetTexId.getNamespace(), targetTexId.getPath() + ".anim" + frameIds.size());
+            textures.registerTexture(id, new NativeImageBackedTexture(frameImg));
+            frameIds.addLast(id);
+        } else {
+            frameIds.addLast(frameIds.getLast());
         }
 
-        for (var anim : anims) {
-            anim.advance();
-        }
+        for (var anim : anims) anim.advance();
         frame++;
-
-        return changed;
     }
 
-    public void tick() {
-        if (this.updateAndDraw(this.getImage(), false)) {
-            this.upload();
-        }
+    public Identifier[] bakeAndUpload() {
+        int i = -1;
+        do {
+            advance();
+            i++;
+        } while (hasNext() && (Animatica.CONFIG.maxAnimFrames == null || i < Animatica.CONFIG.maxAnimFrames));
+
+        var ids = new Identifier[frameIds.size()];
+        frameIds.toArray(ids);
+        return ids;
     }
 
     @Override
     public void close() {
-        for (var anim : anims) {
-            anim.close();
-        }
+        for (var anim : anims) anim.close();
 
-        this.original.close();
-        super.close();
+        this.target.close();
     }
 
-    // Represents an active animation from an animation meta file; progresses through phases while being drawn
-    public static class Animation implements AutoCloseable {
+    // Used to construct all phases of an animation and progress through them as the animation is baked
+    public static class Baking implements AutoCloseable {
         private final List<Phase> phases;
         public final NativeImage sourceTexture;
         public final int targetX;
@@ -139,13 +134,13 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         private boolean changed = true;
 
         // Assembles all animation phases for one texture animation being baked
-        public Animation(AnimationMeta meta, ResourceManager resources) throws IOException {
+        public Baking(AnimationMeta meta, ResourceManager resources) throws IOException {
             this.targetX = meta.targetX();
             this.targetY = meta.targetY();
             this.width = meta.width();
             this.height = meta.height();
 
-            try (var source = resources.getResourceOrThrow(meta.source()).getInputStream()) {
+            try (var source = resources.getResource(meta.source()).getInputStream()) {
                 this.sourceTexture = NativeImage.read(source);
             }
 
