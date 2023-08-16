@@ -19,7 +19,6 @@ package io.github.foundationgames.animatica;
 
 import io.github.foundationgames.animatica.animation.AnimationLoader;
 import io.github.foundationgames.animatica.config.AnimaticaConfig;
-import net.minecraft.util.Identifier;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -54,9 +53,5 @@ public class Animatica {
 
     public static long getTime() {
         return time;
-    }
-
-    public static Identifier id(String path) {
-        return new Identifier(NAMESPACE, path);
     }
 }
