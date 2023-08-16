@@ -1,0 +1,13 @@
+modLoader = "javafml"
+loaderVersion = "[43,)"
+license = "LGPL-v3"
+
+[[mods]]
+modId = "animatica"
+version = "${version}"
+displayName = "AnimaticaReforged"
+authors="TeamPotato"
+logoFile="assets/animatica/icon.png"
+description = '''
+
+'''

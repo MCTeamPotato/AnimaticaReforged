@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.foundationgames.animatica.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "animatica.refmap.json",
+  "client": [
+    "RenderSystemMixin",
+    "IdentifierMixin",
+    "VideoOptionsScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
