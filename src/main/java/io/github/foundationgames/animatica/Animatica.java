@@ -38,20 +38,13 @@ public class Animatica {
 
     public static final AnimaticaConfig CONFIG = new AnimaticaConfig();
 
-    private static long time = 0;
-
     public Animatica() {
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+
         MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, (TickEvent.ClientTickEvent event) -> {
-            if (event.phase == TickEvent.Phase.START) time++;
+            if (event.phase == TickEvent.Phase.START) AnimationLoader.INSTANCE.tickTextures();
         });
 
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
-        
-        FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterClientReloadListenersEvent event) ->
-                event.registerReloadListener(AnimationLoader.INSTANCE));
-    }
-
-    public static long getTime() {
-        return time;
+        FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterClientReloadListenersEvent event)-> event.registerReloadListener(AnimationLoader.INSTANCE));
     }
 }
