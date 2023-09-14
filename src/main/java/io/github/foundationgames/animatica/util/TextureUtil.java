@@ -47,7 +47,7 @@ public enum TextureUtil {;
 
                 // set the color of the target pixel on the destination image
                 // to the color from the corresponding pixel on the source image
-                dest.setColor(trgX, trgY, src.getColor(srcX, srcY));
+                dest.setPixelColor(trgX, trgY, src.getPixelColor(srcX, srcY));
             }
         }
     }
@@ -84,21 +84,21 @@ public enum TextureUtil {;
 
                 // set the color of the target pixel on the destination image to a blend
                 // of the colors from the corresponding pixels on the source image
-                dest.setColor(trgX, trgY, lerpColor(src.getFormat(), src.getColor(srcX0, srcY0), src.getColor(srcX1, srcY1), blend));
+                dest.setPixelColor(trgX, trgY, lerpColor(src.getFormat(), src.getPixelColor(srcX0, srcY0), src.getPixelColor(srcX1, srcY1), blend));
             }
         }
     }
 
     public static int lerpColor(NativeImage.Format format, int c1, int c2, float delta) {
-        int a1 = (c1 >> format.getAlphaOffset()) & 0xFF;
-        int r1 = (c1 >> format.getRedOffset()) & 0xFF;
-        int g1 = (c1 >> format.getGreenOffset()) & 0xFF;
-        int b1 = (c1 >> format.getBlueOffset()) & 0xFF;
+        int a1 = (c1 >> format.getAlphaChannelOffset()) & 0xFF;
+        int r1 = (c1 >> format.redOffset) & 0xFF;
+        int g1 = (c1 >> format.greenOffset) & 0xFF;
+        int b1 = (c1 >> format.blueOffset) & 0xFF;
 
-        int a2 = (c2 >> format.getAlphaOffset()) & 0xFF;
-        int r2 = (c2 >> format.getRedOffset()) & 0xFF;
-        int g2 = (c2 >> format.getGreenOffset()) & 0xFF;
-        int b2 = (c2 >> format.getBlueOffset()) & 0xFF;
+        int a2 = (c2 >> format.getAlphaChannelOffset()) & 0xFF;
+        int r2 = (c2 >> format.redOffset) & 0xFF;
+        int g2 = (c2 >> format.greenOffset) & 0xFF;
+        int b2 = (c2 >> format.blueOffset) & 0xFF;
 
         // If the first or second color is transparent,
         // don't lerp any leftover rgb values and instead
@@ -118,6 +118,6 @@ public enum TextureUtil {;
         int og = (int) MathHelper.lerp(delta, g1, g2);
         int ob = (int) MathHelper.lerp(delta, b1, b2);
 
-        return (oa << format.getAlphaOffset()) | (or << format.getRedOffset()) | (og << format.getGreenOffset()) | (ob << format.getBlueOffset());
+        return (oa << format.getAlphaChannelOffset()) | (or << format.redOffset) | (og << format.greenOffset) | (ob << format.blueOffset);
     }
 }

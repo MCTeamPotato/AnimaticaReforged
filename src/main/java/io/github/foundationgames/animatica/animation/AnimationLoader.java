@@ -47,7 +47,7 @@ public final class AnimationLoader implements SynchronousResourceReloader {
     }
 
     private static void findAllMCPAnimations(ResourceManager manager, Consumer<Identifier> action) {
-        for (var path : ANIM_PATHS) {
+        for (String path : ANIM_PATHS) {
             manager.findResources(path, p -> p.endsWith(".properties")).forEach(action);
         }
     }
@@ -60,7 +60,7 @@ public final class AnimationLoader implements SynchronousResourceReloader {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(this::tickTextures);
         } else {
-            for (var texture : animatedTextures) {
+            for (AnimatedTexture texture : animatedTextures) {
                 texture.tick();
             }
         }
@@ -77,17 +77,17 @@ public final class AnimationLoader implements SynchronousResourceReloader {
 
         Flags.ALLOW_INVALID_ID_CHARS = true;
 
-        var animations = new HashMap<Identifier, List<AnimationMeta>>();
+        Map<Identifier, List<AnimationMeta>> animations = new HashMap<>();
 
         findAllMCPAnimations(manager, id -> {
             try {
-                try (var resourceInputStream = manager.getResource(id).getInputStream()) {
-                    var ppt = new Properties();
+                try (java.io.InputStream resourceInputStream = manager.getResource(id).getInputStream()) {
+                    Properties ppt = new Properties();
                     ppt.load(resourceInputStream);
 
-                    var anim = AnimationMeta.of(id, ppt);
+                    AnimationMeta anim = AnimationMeta.of(id, ppt);
 
-                    var targetId = anim.target();
+                    Identifier targetId = anim.target();
                     if (!animations.containsKey(targetId)) animations.put(targetId, new ArrayList<>());
                     animations.get(targetId).add(anim);
                 }
@@ -96,10 +96,10 @@ public final class AnimationLoader implements SynchronousResourceReloader {
             }
         });
 
-        for (var targetId : animations.keySet()) {
+        for (Identifier targetId : animations.keySet()) {
             AnimatedTexture.tryCreate(manager, targetId, animations.get(targetId))
                     .ifPresent(tex -> {
-                        var animId = new Identifier(targetId.getNamespace(), targetId.getPath() + "-anim");
+                        Identifier animId = new Identifier(targetId.getNamespace(), targetId.getPath() + "-anim");
                         this.animationIds.put(targetId, animId);
                         this.animatedTextures.add(tex);
                         tex.registerTexture(MinecraftClient.getInstance().getTextureManager(), manager, animId, MinecraftClient.getInstance());

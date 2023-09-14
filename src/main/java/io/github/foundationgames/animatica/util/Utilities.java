@@ -24,7 +24,7 @@ public enum Utilities {;
         if (path.getPath().startsWith("./")) {
             int lInd = fileRelativeTo.getPath().lastIndexOf("/");
             if (lInd > 0) {
-                var builder = new StringBuilder(fileRelativeTo.getPath());
+                StringBuilder builder = new StringBuilder(fileRelativeTo.getPath());
                 builder.replace(lInd, builder.length(), path.getPath().replaceFirst("\\./", "/"));
                 return new Identifier(fileRelativeTo.getNamespace(), builder.toString());
             }

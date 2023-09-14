@@ -19,9 +19,11 @@ package io.github.foundationgames.animatica.config;
 
 import io.github.foundationgames.animatica.Animatica;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.CyclingOption;
+import net.minecraft.client.option.BooleanOption;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -31,18 +33,23 @@ public class AnimaticaConfig {
 
     public static final String FILE_NAME = "animatica.properties";
 
-    public static final CyclingOption<Boolean> animatedTexturesOption = CyclingOption.create("option.animatica.animated_textures", opts -> {
-        try {
-            Animatica.CONFIG.load();
-        } catch (IOException e) { Animatica.LOG.error("Error loading config for options screen!", e); }
-        return Animatica.CONFIG.animatedTextures;
-    }, (opts, option, value) -> {
-        Animatica.CONFIG.animatedTextures = value;
-        try {
-            Animatica.CONFIG.save();
-        } catch (IOException e) { Animatica.LOG.error("Error saving config while changing in game!", e); }
-        MinecraftClient.getInstance().reloadResources();
-    });
+    public static final BooleanOption animatedTexturesOption = new BooleanOption(
+            "option.animatica.animated_textures",
+            gameOptions -> {
+                try {
+                    Animatica.CONFIG.load();
+                } catch (IOException e) { Animatica.LOG.error("Error loading config for options screen!", e); }
+                return Animatica.CONFIG.animatedTextures;
+            },
+            (gameOptions, aBoolean) -> {
+                Animatica.CONFIG.animatedTextures = aBoolean;
+                try {
+                    Animatica.CONFIG.save();
+                } catch (IOException e) { Animatica.LOG.error("Error saving config while changing in game!", e); }
+            }
+    );
+
+
     public boolean animatedTextures;
 
     public AnimaticaConfig() {
@@ -62,7 +69,7 @@ public class AnimaticaConfig {
     }
 
     public Path getFile() throws IOException {
-        var file = MinecraftClient.getInstance().runDirectory.toPath().getFileSystem().getPath("config").resolve(FILE_NAME);
+        Path file = MinecraftClient.getInstance().runDirectory.toPath().getFileSystem().getPath("config").resolve(FILE_NAME);
         if (!Files.exists(file)) {
             Files.createFile(file);
         }
@@ -70,32 +77,29 @@ public class AnimaticaConfig {
         return file;
     }
 
-    public CyclingOption<Boolean> getAnimatedTexturesOption() {
-        return animatedTexturesOption;
-    }
-
     public void save() throws IOException {
-        var file = getFile();
-        var properties = new Properties();
+        Path file = getFile();
+        Properties properties = new Properties();
 
         writeTo(properties);
 
-        try (var out = Files.newOutputStream(file)) {
+        try (OutputStream out = Files.newOutputStream(file)) {
             properties.store(out, "Configuration file for Animatica");
         }
     }
 
     public void load() throws IOException {
-        var file = getFile();
-        var properties = new Properties();
+        Path file = getFile();
+        Properties properties = new Properties();
 
-        try (var in = Files.newInputStream(file)) {
+        try (InputStream in = Files.newInputStream(file)) {
             properties.load(in);
         }
 
         readFrom(properties);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean boolFrom(String s, boolean defaultVal) {
         return s == null ? defaultVal : "true".equals(s);
     }

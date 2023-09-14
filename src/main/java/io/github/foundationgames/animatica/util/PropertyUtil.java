@@ -28,7 +28,7 @@ import java.util.Properties;
 
 public enum PropertyUtil {;
     public static String get(Identifier file, Properties properties, String key) throws PropertyParseException {
-        var p = properties.getProperty(key);
+        String p = properties.getProperty(key);
         if (p == null) {
             throw new MissingPropertyException(file, key);
         }
@@ -36,11 +36,11 @@ public enum PropertyUtil {;
     }
 
     public static Properties getSubProperties(Properties properties, String key) {
-        var p = new Properties();
-        final var prefix = key + ".";
+        Properties p = new Properties();
+        final String prefix = key + ".";
         for (String k : properties.stringPropertyNames()) {
             if (k.startsWith(prefix)) {
-                var newKey = k.replaceFirst(prefix, "");
+                String newKey = k.replaceFirst(prefix, "");
                 p.setProperty(newKey, properties.getProperty(k));
             }
         }
@@ -58,7 +58,7 @@ public enum PropertyUtil {;
     }
 
     public static int getIntOr(Identifier file, Properties properties, String key, int defaultVal) throws PropertyParseException {
-        var p = properties.getProperty(key);
+        String p = properties.getProperty(key);
         if (p == null) {
             return defaultVal;
         }
@@ -72,7 +72,7 @@ public enum PropertyUtil {;
     }
 
     public static boolean getBoolOr(Identifier file, Properties properties, String key, boolean defaultVal) throws PropertyParseException {
-        var p = properties.getProperty(key);
+        String p = properties.getProperty(key);
         if (p == null) {
             return defaultVal;
         }
@@ -83,7 +83,7 @@ public enum PropertyUtil {;
     }
 
     public static Map<Integer, Integer> intToIntMap(Properties in) {
-        var builder = ImmutableMap.<Integer, Integer>builder();
+        ImmutableMap.Builder<Integer, Integer> builder = ImmutableMap.builder();
         for (String k : in.stringPropertyNames()) {
             try {
                 builder.put(Integer.parseInt(k), Integer.parseInt(in.getProperty(k)));

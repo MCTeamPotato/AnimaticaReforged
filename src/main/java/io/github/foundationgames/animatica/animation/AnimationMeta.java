@@ -29,21 +29,48 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-public record AnimationMeta(
-        Identifier source, Identifier target, int targetX,
-        int targetY, int width, int height, int defaultFrameDuration, boolean interpolate,
-        int interpolationDelay, Map<Integer, Integer> frameMapping,
-        Map<Integer, Integer> frameDurations
-) {
+public class AnimationMeta {
+    private final Identifier source;
+    private final Identifier target;
+    private final int targetX;
+    private final int targetY;
+    private final int width;
+    private final int height;
+    private final int defaultFrameDuration;
+    private final boolean interpolate;
+    private final int interpolationDelay;
+    private final Map<Integer, Integer> frameMapping;
+    private final Map<Integer, Integer> frameDurations;
+
+    public AnimationMeta(Identifier source, Identifier target, int targetX, int targetY, int width, int height,
+                         int defaultFrameDuration, boolean interpolate, int interpolationDelay,
+                         Map<Integer, Integer> frameMapping, Map<Integer, Integer> frameDurations) {
+        this.source = source;
+        this.target = target;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.width = width;
+        this.height = height;
+        this.defaultFrameDuration = defaultFrameDuration;
+        this.interpolate = interpolate;
+        this.interpolationDelay = interpolationDelay;
+        this.frameMapping = frameMapping;
+        this.frameDurations = frameDurations;
+    }
+
     public static AnimationMeta of(Identifier file, Properties properties) throws PropertyParseException {
         Identifier source;
         Identifier target;
         try {
             source = Utilities.processPath(file, new Identifier(PropertyUtil.get(file, properties, "from")));
-        } catch (InvalidIdentifierException ex) { throw new InvalidPropertyException(file, "from", "resource location"); }
+        } catch (InvalidIdentifierException ex) {
+            throw new InvalidPropertyException(file, "from", "resource location");
+        }
         try {
             target = Utilities.processPath(file, new Identifier(PropertyUtil.get(file, properties, "to")));
-        } catch (InvalidIdentifierException ex) { throw new InvalidPropertyException(file, "to", "resource location"); }
+        } catch (InvalidIdentifierException ex) {
+            throw new InvalidPropertyException(file, "to", "resource location");
+        }
         return new AnimationMeta(
                 source,
                 target,
@@ -69,5 +96,50 @@ public record AnimationMeta(
         }
 
         return greatestFrame;
+    }
+
+    // Getter methods for the fields go here
+    public Identifier source() {
+        return source;
+    }
+
+    public Identifier target() {
+        return target;
+    }
+
+    public int targetX() {
+        return targetX;
+    }
+
+    public int targetY() {
+        return targetY;
+    }
+
+    public int width() {
+        return width;
+    }
+
+    public int height() {
+        return height;
+    }
+
+    public int defaultFrameDuration() {
+        return defaultFrameDuration;
+    }
+
+    public boolean interpolate() {
+        return interpolate;
+    }
+
+    public int interpolationDelay() {
+        return interpolationDelay;
+    }
+
+    public Map<Integer, Integer> frameMapping() {
+        return frameMapping;
+    }
+
+    public Map<Integer, Integer> frameDurations() {
+        return frameDurations;
     }
 }

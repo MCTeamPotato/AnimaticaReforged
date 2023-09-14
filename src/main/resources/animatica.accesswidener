@@ -1,0 +1,5 @@
+accessWidener   v2  named
+
+accessible field net/minecraft/client/texture/NativeImage$Format blueOffset I
+accessible field net/minecraft/client/texture/NativeImage$Format greenOffset I
+accessible field net/minecraft/client/texture/NativeImage$Format redOffset I

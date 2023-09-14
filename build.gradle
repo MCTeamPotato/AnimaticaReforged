@@ -2,15 +2,17 @@ plugins {
     id "dev.architectury.loom" version "1.1-SNAPSHOT"
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
 
 archivesBaseName = archives_base_name
 version = mod_version
 group = maven_group
 
 loom {
+    accessWidenerPath = file("src/main/resources/animatica.accesswidener")
     silentMojangMappingsLicense()
     forge {
+        convertAccessWideners = true
         mixinConfigs = [
             "animatica.mixins.json"
         ]
@@ -33,7 +35,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(8)
 }
 
 jar {

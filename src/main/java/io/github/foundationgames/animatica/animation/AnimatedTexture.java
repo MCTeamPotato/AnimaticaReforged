@@ -37,7 +37,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
     private int frame = 0;
 
     public static Optional<AnimatedTexture> tryCreate(ResourceManager resources, Identifier targetTexId, List<AnimationMeta> anims) {
-        try (var targetTexResource = resources.getResource(targetTexId).getInputStream()) {
+        try (java.io.InputStream targetTexResource = resources.getResource(targetTexId).getInputStream()) {
             return Optional.of(new AnimatedTexture(resources, anims, NativeImage.read(targetTexResource)));
         } catch (IOException e) { Animatica.LOG.error(e); }
 
@@ -58,7 +58,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
     }
 
     public boolean canLoop() {
-        for (var anim : anims) {
+        for (Animation anim : anims) {
             if (!anim.isOnFrameZero()) {
                 return false;
             }
@@ -78,7 +78,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             changed = true;
         }
 
-        for (var anim : anims) {
+        for (Animation anim : anims) {
             if (anim.isChanged()) {
                 changed = true;
                 break;
@@ -89,9 +89,10 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             image.copyFrom(this.original);
 
             Phase phase;
-            for (var anim : anims) {
+            for (Animation anim : anims) {
                 phase = anim.getCurrentPhase();
-                if (phase instanceof InterpolatedPhase iPhase) {
+                if (phase instanceof InterpolatedPhase) {
+                    InterpolatedPhase iPhase = (InterpolatedPhase)phase;
                     TextureUtil.blendCopy(anim.sourceTexture, 0, iPhase.prevV, 0, iPhase.v, anim.width, anim.height, image, anim.targetX, anim.targetY, iPhase.blend.getBlend(anim.getPhaseFrame()));
                 } else {
                     TextureUtil.copy(anim.sourceTexture, 0, phase.v, anim.width, anim.height, image, anim.targetX, anim.targetY);
@@ -99,7 +100,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             }
         }
 
-        for (var anim : anims) {
+        for (Animation anim : anims) {
             anim.advance();
         }
         frame++;
@@ -115,7 +116,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
 
     @Override
     public void close() {
-        for (var anim : anims) {
+        for (Animation anim : anims) {
             anim.close();
         }
 
@@ -145,11 +146,11 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             this.width = meta.width();
             this.height = meta.height();
 
-            try (var source = resources.getResource(meta.source()).getInputStream()) {
+            try (java.io.InputStream source = resources.getResource(meta.source()).getInputStream()) {
                 this.sourceTexture = NativeImage.read(source);
             }
 
-            var phases = ImmutableList.<Phase>builder();
+            ImmutableList.Builder<Phase> phases = ImmutableList.<Phase>builder();
             int duration = 0;
 
             final int textureFrameCount = (int)Math.floor((float) sourceTexture.getHeight() / meta.height());
@@ -204,14 +205,14 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             changed = false;
             int progress = frame;
 
-            for (var phase : phases) {
+            for (Phase phase : phases) {
                 progress -= phase.duration; // Take away as much progress as each phase is long, until progress is below zero
                 if (progress < 0) {
                     if (currentPhase != phase) {
                         // Marks baking anim as changed should it be in a new, unique phase
                         changed = true;
                     }
-                    if (phase instanceof InterpolatedPhase iPhase) changed = iPhase.hasChangingV(); // Marks baking anim as changed should its current phase be changing
+                    if (phase instanceof InterpolatedPhase) changed = ((InterpolatedPhase)phase).hasChangingV(); // Marks baking anim as changed should its current phase be changing
 
                     this.currentPhase = phase;
                     this.phaseFrame = phase.duration + progress; // Adding progress to the phase duration results in how far it is into the phase
