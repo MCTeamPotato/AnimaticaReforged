@@ -18,9 +18,10 @@
 package io.github.foundationgames.animatica.util;
 
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 public enum Utilities {;
-    public static Identifier processPath(Identifier fileRelativeTo, Identifier path) {
+    public static @NotNull Identifier processPath(Identifier fileRelativeTo, @NotNull Identifier path) {
         if (path.getPath().startsWith("./")) {
             int lInd = fileRelativeTo.getPath().lastIndexOf("/");
             if (lInd > 0) {

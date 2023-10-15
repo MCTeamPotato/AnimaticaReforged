@@ -97,6 +97,7 @@ public class AnimaticaConfig {
         readFrom(properties);
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static boolean boolFrom(String s, boolean defaultVal) {
         return s == null ? defaultVal : "true".equals(s);
     }
