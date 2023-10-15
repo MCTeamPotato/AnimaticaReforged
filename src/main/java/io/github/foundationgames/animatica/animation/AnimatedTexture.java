@@ -25,6 +25,7 @@ import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         return Optional.empty();
     }
 
-    public AnimatedTexture(ResourceManager resources, List<AnimationMeta> metas, NativeImage image) throws IOException {
+    @SuppressWarnings("resource")
+    public AnimatedTexture(ResourceManager resources, @NotNull List<AnimationMeta> metas, @NotNull NativeImage image) throws IOException {
         super(new NativeImage(image.getFormat(), image.getWidth(), image.getHeight(), true));
 
         this.anims = new Animation[metas.size()];
@@ -140,7 +142,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         private boolean changed = true;
 
         // Assembles all animation phases for one texture animation being baked
-        public Animation(AnimationMeta meta, ResourceManager resources) throws IOException {
+        public Animation(@NotNull AnimationMeta meta, @NotNull ResourceManager resources) throws IOException {
             this.targetX = meta.targetX();
             this.targetY = meta.targetY();
             this.width = meta.width();

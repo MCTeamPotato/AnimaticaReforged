@@ -17,17 +17,18 @@
  */
 package io.github.foundationgames.animatica.animation;
 
+import com.teampotato.iterable.MergedIterable;
 import io.github.foundationgames.animatica.util.PropertyUtil;
 import io.github.foundationgames.animatica.util.Utilities;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 public class AnimationMeta {
     private final Identifier source;
@@ -58,7 +59,8 @@ public class AnimationMeta {
         this.frameDurations = frameDurations;
     }
 
-    public static AnimationMeta of(Identifier file, Properties properties) throws PropertyParseException {
+    @Contract("_, _ -> new")
+    public static @NotNull AnimationMeta of(Identifier file, Properties properties) throws PropertyParseException {
         Identifier source;
         Identifier target;
         try {
@@ -87,11 +89,8 @@ public class AnimationMeta {
     }
 
     public int getGreatestUsedFrame() {
-        Set<Integer> frames = new HashSet<>(frameMapping.keySet());
-        frames.addAll(frameDurations.keySet());
-
         int greatestFrame = 0;
-        for (int frame : frames) {
+        for (int frame : new MergedIterable<>(frameMapping.keySet(), frameDurations.keySet())) {
             greatestFrame = Math.max(frame, greatestFrame);
         }
 
