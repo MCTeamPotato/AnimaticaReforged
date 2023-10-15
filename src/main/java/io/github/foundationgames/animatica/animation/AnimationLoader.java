@@ -21,6 +21,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.Flags;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
@@ -29,13 +31,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public final class AnimationLoader implements SynchronousResourceReloader {
@@ -47,8 +43,8 @@ public final class AnimationLoader implements SynchronousResourceReloader {
 
     public static final AnimationLoader INSTANCE = new AnimationLoader();
 
-    private final Map<Identifier, Identifier> animationIds = new HashMap<>();
-    private final Set<AnimatedTexture> animatedTextures = new HashSet<>();
+    private final Map<Identifier, Identifier> animationIds = new Object2ObjectOpenHashMap<>();
+    private final Set<AnimatedTexture> animatedTextures = new ObjectOpenHashSet<>();
 
     private AnimationLoader() {
     }
@@ -84,7 +80,7 @@ public final class AnimationLoader implements SynchronousResourceReloader {
 
         Flags.ALLOW_INVALID_ID_CHARS = true;
 
-        var animations = new HashMap<Identifier, List<AnimationMeta>>();
+        var animations = new Object2ObjectOpenHashMap<Identifier, List<AnimationMeta>>();
 
         findAllMCPAnimations(manager, (id, resource) -> {
             try {

@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.VideoOptionsScreen;
 import net.minecraft.client.option.SimpleOption;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -40,7 +41,7 @@ public abstract class VideoOptionsScreenMixin extends Screen {
             ),
             index = 0
     )
-    private SimpleOption<?>[] animatica$addTextureAnimationOptionButton(SimpleOption<?>[] old) {
+    private SimpleOption<?> @NotNull [] animatica$addTextureAnimationOptionButton(SimpleOption<?> @NotNull [] old) {
         var options = new SimpleOption<?>[old.length + 1];
         System.arraycopy(old, 0, options, 0, old.length);
         options[options.length - 1] = Animatica.CONFIG.getAnimatedTexturesOption();

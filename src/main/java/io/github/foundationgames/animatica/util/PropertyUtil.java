@@ -22,12 +22,14 @@ import io.github.foundationgames.animatica.util.exception.InvalidPropertyExcepti
 import io.github.foundationgames.animatica.util.exception.MissingPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Map;
 import java.util.Properties;
 
 public enum PropertyUtil {;
-    public static String get(Identifier file, Properties properties, String key) throws PropertyParseException {
+    public static @NotNull String get(Identifier file, @NotNull Properties properties, String key) throws PropertyParseException {
         var p = properties.getProperty(key);
         if (p == null) {
             throw new MissingPropertyException(file, key);
@@ -35,7 +37,7 @@ public enum PropertyUtil {;
         return p;
     }
 
-    public static Properties getSubProperties(Properties properties, String key) {
+    public static @NotNull Properties getSubProperties(@NotNull Properties properties, String key) {
         var p = new Properties();
         final var prefix = key + ".";
         for (String k : properties.stringPropertyNames()) {
@@ -57,7 +59,7 @@ public enum PropertyUtil {;
         return r;
     }
 
-    public static int getIntOr(Identifier file, Properties properties, String key, int defaultVal) throws PropertyParseException {
+    public static int getIntOr(Identifier file, @NotNull Properties properties, String key, int defaultVal) throws PropertyParseException {
         var p = properties.getProperty(key);
         if (p == null) {
             return defaultVal;
@@ -71,7 +73,7 @@ public enum PropertyUtil {;
         return r;
     }
 
-    public static boolean getBoolOr(Identifier file, Properties properties, String key, boolean defaultVal) throws PropertyParseException {
+    public static boolean getBoolOr(Identifier file, @NotNull Properties properties, String key, boolean defaultVal) throws PropertyParseException {
         var p = properties.getProperty(key);
         if (p == null) {
             return defaultVal;
@@ -82,7 +84,7 @@ public enum PropertyUtil {;
         throw new InvalidPropertyException(file, key, "boolean (false/true)");
     }
 
-    public static Map<Integer, Integer> intToIntMap(Properties in) {
+    public static @NotNull @Unmodifiable Map<Integer, Integer> intToIntMap(@NotNull Properties in) {
         var builder = ImmutableMap.<Integer, Integer>builder();
         for (String k : in.stringPropertyNames()) {
             try {

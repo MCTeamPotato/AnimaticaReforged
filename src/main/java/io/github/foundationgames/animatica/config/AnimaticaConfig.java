@@ -20,6 +20,7 @@ package io.github.foundationgames.animatica.config;
 import io.github.foundationgames.animatica.Animatica;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.SimpleOption;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,11 +55,11 @@ public class AnimaticaConfig {
         );
     }
 
-    public void writeTo(Properties properties) {
+    public void writeTo(@NotNull Properties properties) {
         properties.put(ANIMATED_TEXTURES_KEY, Boolean.toString(animatedTextures));
     }
 
-    public void readFrom(Properties properties) {
+    public void readFrom(@NotNull Properties properties) {
         this.animatedTextures = boolFrom(properties.getProperty(ANIMATED_TEXTURES_KEY), true);
     }
 
