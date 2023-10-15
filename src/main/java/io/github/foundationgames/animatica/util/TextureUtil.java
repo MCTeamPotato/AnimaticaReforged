@@ -19,6 +19,7 @@ package io.github.foundationgames.animatica.util;
 
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.math.MathHelper;
+import org.jetbrains.annotations.NotNull;
 
 public enum TextureUtil {;
 
@@ -89,7 +90,7 @@ public enum TextureUtil {;
         }
     }
 
-    public static int lerpColor(NativeImage.Format format, int c1, int c2, float delta) {
+    public static int lerpColor(NativeImage.@NotNull Format format, int c1, int c2, float delta) {
         int a1 = (c1 >> format.getAlphaOffset()) & 0xFF;
         int r1 = (c1 >> format.getRedOffset()) & 0xFF;
         int g1 = (c1 >> format.getGreenOffset()) & 0xFF;

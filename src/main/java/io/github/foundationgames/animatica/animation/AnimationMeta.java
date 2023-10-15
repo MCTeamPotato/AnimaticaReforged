@@ -17,25 +17,22 @@
  */
 package io.github.foundationgames.animatica.animation;
 
+import com.teampotato.iterable.MergedIterable;
 import io.github.foundationgames.animatica.util.PropertyUtil;
 import io.github.foundationgames.animatica.util.Utilities;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-public record AnimationMeta(
-        Identifier source, Identifier target, int targetX,
-        int targetY, int width, int height, int defaultFrameDuration, boolean interpolate,
-        int interpolationDelay, Map<Integer, Integer> frameMapping,
-        Map<Integer, Integer> frameDurations
-) {
-    public static AnimationMeta of(Identifier file, Properties properties) throws PropertyParseException {
+public record AnimationMeta(Identifier source, Identifier target, int targetX, int targetY, int width, int height, int defaultFrameDuration, boolean interpolate, int interpolationDelay, Map<Integer, Integer> frameMapping, Map<Integer, Integer> frameDurations) {
+    @Contract("_, _ -> new")
+    public static @NotNull AnimationMeta of(Identifier file, Properties properties) throws PropertyParseException {
         Identifier source;
         Identifier target;
         try {
@@ -60,11 +57,8 @@ public record AnimationMeta(
     }
 
     public int getGreatestUsedFrame() {
-        Set<Integer> frames = new HashSet<>(frameMapping.keySet());
-        frames.addAll(frameDurations.keySet());
-
         int greatestFrame = 0;
-        for (int frame : frames) {
+        for (int frame : new MergedIterable<>(frameMapping.keySet(), frameDurations.keySet())) {
             greatestFrame = Math.max(frame, greatestFrame);
         }
 
