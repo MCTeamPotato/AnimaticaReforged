@@ -17,9 +17,11 @@
  */
 package io.github.foundationgames.animatica.animation;
 
-import com.google.common.collect.ImmutableList;
 import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.TextureUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.resource.ResourceManager;
@@ -151,7 +153,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
                 this.sourceTexture = NativeImage.read(source);
             }
 
-            var phases = ImmutableList.<Phase>builder();
+            ObjectList<Phase> phases = new ObjectArrayList<>();
             int duration = 0;
 
             final int textureFrameCount = (int)Math.floor((float) sourceTexture.getHeight() / meta.height());
@@ -197,7 +199,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             }
 
             this.duration = duration;
-            this.phases = phases.build();
+            this.phases = ObjectLists.unmodifiable(phases);
 
             updateCurrentPhase();
         }

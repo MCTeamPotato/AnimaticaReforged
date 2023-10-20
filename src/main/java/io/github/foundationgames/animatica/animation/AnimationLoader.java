@@ -22,6 +22,7 @@ import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.Flags;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.ResourceManager;
@@ -90,7 +91,7 @@ public final class AnimationLoader implements SynchronousResourceReloader {
                     var anim = AnimationMeta.of(id, ppt);
 
                     var targetId = anim.target();
-                    if (!animations.containsKey(targetId)) animations.put(targetId, new ArrayList<>());
+                    if (!animations.containsKey(targetId)) animations.put(targetId, new ObjectArrayList<>());
                     animations.get(targetId).add(anim);
                 }
             } catch (IOException | PropertyParseException e) {
