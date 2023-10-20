@@ -7,7 +7,7 @@ modId = "animatica"
 version = "${version}"
 displayName = "AnimaticaReforged"
 authors="TeamPotato"
-logoFile="assets/animatica/icon.png"
+logoFile= "icon.png"
 description = '''
 
 '''
