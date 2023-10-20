@@ -1,4 +1,4 @@
-package com.teampotato.iterable;
+package io.github.foundationgames.animatica.util;
 
 import org.jetbrains.annotations.NotNull;
 
