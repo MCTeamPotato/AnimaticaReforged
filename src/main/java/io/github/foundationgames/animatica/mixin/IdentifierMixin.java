@@ -26,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // Allows invalid characters in paths to support packs with extremely outdated formatting (because OptiFine does too)
 // animatica$reportInvalidIdentifierCharacters and animatica$isPathAllowed are very expensive during Identifier initialization, so they're disabled
+@SuppressWarnings("CommentedOutCode")
 @Mixin(Identifier.class)
 public class IdentifierMixin {
     /*@Inject(method = "<init>([Ljava/lang/String;)V", at = @At("TAIL"))
