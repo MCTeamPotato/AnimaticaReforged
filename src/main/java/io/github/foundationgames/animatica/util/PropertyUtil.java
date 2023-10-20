@@ -17,10 +17,11 @@
  */
 package io.github.foundationgames.animatica.util;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
 import io.github.foundationgames.animatica.util.exception.MissingPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
+import it.unimi.dsi.fastutil.ints.Int2IntMaps;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -84,13 +85,13 @@ public enum PropertyUtil {;
         throw new InvalidPropertyException(file, key, "boolean (false/true)");
     }
 
-    public static @Unmodifiable Map<Integer, Integer> intToIntMap(@NotNull Properties in) {
-        ImmutableMap.Builder<Integer, Integer> builder = ImmutableMap.builder();
+    public static @Unmodifiable @NotNull Map<Integer, Integer> intToIntMap(@NotNull Properties in) {
+        Int2IntOpenHashMap map = new Int2IntOpenHashMap();
         for (String k : in.stringPropertyNames()) {
             try {
-                builder.put(Integer.parseInt(k), Integer.parseInt(in.getProperty(k)));
+                map.put(Integer.parseInt(k), Integer.parseInt(in.getProperty(k)));
             } catch (NumberFormatException ignored) {}
         }
-        return builder.build();
+        return Int2IntMaps.unmodifiable(map);
     }
 }

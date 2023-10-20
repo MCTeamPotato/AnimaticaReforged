@@ -17,9 +17,11 @@
  */
 package io.github.foundationgames.animatica.animation;
 
-import com.google.common.collect.ImmutableList;
 import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.TextureUtil;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectLists;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.resource.ResourceManager;
@@ -28,7 +30,6 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,14 +153,14 @@ public class AnimatedTexture extends NativeImageBackedTexture {
                 this.sourceTexture = NativeImage.read(source);
             }
 
-            ImmutableList.Builder<Phase> phases = ImmutableList.<Phase>builder();
+            ObjectList<Phase> phases = new ObjectArrayList<>();
             int duration = 0;
 
             final int textureFrameCount = (int)Math.floor((float) sourceTexture.getHeight() / meta.height());
             final int animFrameCount = Math.max(textureFrameCount, meta.getGreatestUsedFrame() + 1);
 
             // The int array stored for each frame must contain the frame mapping and duration
-            List<int[]> frames = new ArrayList<>();
+            List<int[]> frames = new ObjectArrayList<>();
             for (int f = 0; f < animFrameCount; f++) {
                 if (f >= textureFrameCount && !meta.frameMapping().containsKey(f)) {
                     continue;
@@ -198,7 +199,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             }
 
             this.duration = duration;
-            this.phases = phases.build();
+            this.phases = ObjectLists.unmodifiable(phases);
 
             updateCurrentPhase();
         }
