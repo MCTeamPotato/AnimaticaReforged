@@ -32,7 +32,10 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public final class AnimationLoader implements SynchronousResourceReloader {
