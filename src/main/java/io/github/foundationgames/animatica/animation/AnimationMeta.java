@@ -17,7 +17,7 @@
  */
 package io.github.foundationgames.animatica.animation;
 
-import com.teampotato.iterable.MergedIterable;
+import io.github.foundationgames.animatica.util.MergedIterable;
 import io.github.foundationgames.animatica.util.PropertyUtil;
 import io.github.foundationgames.animatica.util.Utilities;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
