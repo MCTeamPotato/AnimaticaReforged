@@ -29,7 +29,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Map;
 import java.util.Properties;
 
-public enum PropertyUtil {;
+public final class PropertyUtil {
     public static @NotNull String get(Identifier file, @NotNull Properties properties, String key) throws PropertyParseException {
         var p = properties.getProperty(key);
         if (p == null) {

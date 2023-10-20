@@ -28,7 +28,7 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 public class AnimaticaConfig {
-    public static String ANIMATED_TEXTURES_KEY = "animated_textures";
+    public static final String ANIMATED_TEXTURES_KEY = "animated_textures";
 
     public static final String FILE_NAME = "animatica.properties";
 
@@ -60,7 +60,7 @@ public class AnimaticaConfig {
     }
 
     public void readFrom(@NotNull Properties properties) {
-        this.animatedTextures = boolFrom(properties.getProperty(ANIMATED_TEXTURES_KEY), true);
+        this.animatedTextures = boolFrom(properties.getProperty(ANIMATED_TEXTURES_KEY));
     }
 
     public Path getFile() throws IOException {
@@ -98,7 +98,7 @@ public class AnimaticaConfig {
         readFrom(properties);
     }
 
-    private static boolean boolFrom(String s, boolean defaultVal) {
-        return s == null ? defaultVal : "true".equals(s);
+    private static boolean boolFrom(String s) {
+        return s == null || "true".equals(s);
     }
 }

@@ -21,7 +21,7 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
-public enum TextureUtil {;
+public final class TextureUtil {
 
     /**
      * Copy a section of an image into another image
@@ -104,11 +104,11 @@ public enum TextureUtil {;
         // If the first or second color is transparent,
         // don't lerp any leftover rgb values and instead
         // only use those of the non-transparent color
-        if (a1 <= 0) {
+        if (a1 == 0) {
             r1 = r2;
             g1 = g2;
             b1 = b2;
-        } else if (a2 <= 0) {
+        } else if (a2 == 0) {
             r2 = r1;
             g2 = g1;
             b2 = b1;
