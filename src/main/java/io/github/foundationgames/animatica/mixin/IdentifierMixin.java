@@ -17,7 +17,7 @@
  */
 package io.github.foundationgames.animatica.mixin;
 
-import io.github.foundationgames.animatica.util.Flags;
+import io.github.foundationgames.animatica.Animatica;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +39,7 @@ public class IdentifierMixin {
 
     @Inject(method = "isPathCharacterValid", at = @At("RETURN"), cancellable = true)
     private static void animatica$allowInvalidCharacters(char character, CallbackInfoReturnable<Boolean> cir) {
-        if (Flags.ALLOW_INVALID_ID_CHARS) {
+        if (Animatica.ALLOW_INVALID_ID_CHARS) {
             cir.setReturnValue(true);
         }
     }

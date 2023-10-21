@@ -6,8 +6,7 @@
   "refmap": "animatica.refmap.json",
   "client": [
     "RenderSystemMixin",
-    "IdentifierMixin",
-    "VideoOptionsScreenMixin"
+    "IdentifierMixin"
   ],
   "injectors": {
     "defaultRequire": 1
