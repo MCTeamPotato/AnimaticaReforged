@@ -6,7 +6,8 @@
   "refmap": "animatica.refmap.json",
   "client": [
     "RenderSystemMixin",
-    "IdentifierMixin"
+    "IdentifierMixin",
+    "embeddium.SodiumGameOptionPagesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
