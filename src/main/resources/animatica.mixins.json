@@ -7,7 +7,7 @@
   "client": [
     "IdentifierMixin",
     "TextureManagerMixin",
-    "VideoOptionsScreenMixin"
+    "embeddium.SodiumGameOptionPagesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

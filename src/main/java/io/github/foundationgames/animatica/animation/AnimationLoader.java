@@ -19,7 +19,6 @@ package io.github.foundationgames.animatica.animation;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.foundationgames.animatica.Animatica;
-import io.github.foundationgames.animatica.util.Flags;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -78,11 +77,11 @@ public final class AnimationLoader implements SynchronousResourceReloader {
         this.animatedTextures.clear();
         this.animationIds.clear();
 
-        if (!Animatica.CONFIG.animatedTextures) {
+        if (!Animatica.ANIMATED_TEXTURES.get()) {
             return;
         }
 
-        Flags.ALLOW_INVALID_ID_CHARS = true;
+        Animatica.ALLOW_INVALID_ID_CHARS = true;
 
         Map<Identifier, List<AnimationMeta>> animations = new Object2ObjectOpenHashMap<>();
 
@@ -113,6 +112,6 @@ public final class AnimationLoader implements SynchronousResourceReloader {
                     });
         }
 
-        Flags.ALLOW_INVALID_ID_CHARS = false;
+        Animatica.ALLOW_INVALID_ID_CHARS = false;
     }
 }

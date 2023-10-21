@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 public abstract class TextureManagerMixin {
     @ModifyVariable(method = "bindTexture", at = @At("HEAD"), index = 1, argsOnly = true)
     private Identifier animatica$replaceWithAnimatedTexture(Identifier old) {
-        if (Animatica.CONFIG.animatedTextures) {
+        if (Animatica.ANIMATED_TEXTURES.get()) {
             Identifier anim = AnimationLoader.INSTANCE.getAnimationId(old);
             if (anim != null) {
                 return anim;
