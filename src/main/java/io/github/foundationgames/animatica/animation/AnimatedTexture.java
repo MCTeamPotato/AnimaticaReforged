@@ -18,7 +18,7 @@
 package io.github.foundationgames.animatica.animation;
 
 import io.github.foundationgames.animatica.Animatica;
-import io.github.foundationgames.animatica.util.TextureUtil;
+import io.github.foundationgames.animatica.util.Utilities;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -96,9 +96,9 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             for (var anim : anims) {
                 phase = anim.getCurrentPhase();
                 if (phase instanceof InterpolatedPhase iPhase) {
-                    TextureUtil.blendCopy(anim.sourceTexture, 0, iPhase.prevV, 0, iPhase.v, anim.width, anim.height, image, anim.targetX, anim.targetY, iPhase.blend.getBlend(anim.getPhaseFrame()));
+                    Utilities.blendCopy(anim.sourceTexture, 0, iPhase.prevV, 0, iPhase.v, anim.width, anim.height, image, anim.targetX, anim.targetY, iPhase.blend.getBlend(anim.getPhaseFrame()));
                 } else {
-                    TextureUtil.copy(anim.sourceTexture, 0, phase.v, anim.width, anim.height, image, anim.targetX, anim.targetY);
+                    Utilities.copy(anim.sourceTexture, 0, phase.v, anim.width, anim.height, image, anim.targetX, anim.targetY);
                 }
             }
         }
