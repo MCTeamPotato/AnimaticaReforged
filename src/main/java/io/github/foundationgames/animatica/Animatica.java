@@ -18,17 +18,17 @@
 package io.github.foundationgames.animatica;
 
 import io.github.foundationgames.animatica.animation.AnimationLoader;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.fml.IExtensionPoint;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.network.NetworkConstants;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
+import net.neoforged.neoforge.network.NetworkConstants;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +40,7 @@ public class Animatica {
     public static volatile boolean ALLOW_INVALID_ID_CHARS = false;
 
     public Animatica() {
-        MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, (TickEvent.ClientTickEvent event) -> {
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, TickEvent.ClientTickEvent.class, event -> {
             if (event.phase == TickEvent.Phase.START) AnimationLoader.INSTANCE.tickTextures();
         });
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CONFIG);
@@ -48,11 +48,12 @@ public class Animatica {
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener((RegisterClientReloadListenersEvent event)-> event.registerReloadListener(AnimationLoader.INSTANCE));
     }
-    public static final ForgeConfigSpec CONFIG;
-    public static final ForgeConfigSpec.BooleanValue ANIMATED_TEXTURES;
+
+    public static final ModConfigSpec CONFIG;
+    public static final ModConfigSpec.BooleanValue ANIMATED_TEXTURES;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("Animatica");
         ANIMATED_TEXTURES = builder.define("AnimatedTextures", true);
         builder.pop();
