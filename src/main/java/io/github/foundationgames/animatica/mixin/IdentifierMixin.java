@@ -28,6 +28,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class IdentifierMixin {
     @Inject(method = "isPathCharacterValid", at = @At("HEAD"), cancellable = true)
     private static void animatica$allowInvalidCharacters(char character, CallbackInfoReturnable<Boolean> cir) {
-        if (Animatica.ALLOW_INVALID_ID_CHARS) cir.setReturnValue(true);
+        if (Animatica.ALLOW_INVALID_ID_CHARS) cir.setReturnValue(Boolean.TRUE);
     }
 }

@@ -19,6 +19,7 @@ package io.github.foundationgames.animatica.animation;
 
 import io.github.foundationgames.animatica.Animatica;
 import io.github.foundationgames.animatica.util.Utilities;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
@@ -30,7 +31,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
 import java.util.Optional;
 
 public class AnimatedTexture extends NativeImageBackedTexture {
@@ -38,7 +39,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
     private final NativeImage original;
     private int frame = 0;
 
-    public static Optional<AnimatedTexture> tryCreate(ResourceManager resources, Identifier targetTexId, List<AnimationMeta> anims) {
+    public static Optional<AnimatedTexture> tryCreate(ResourceManager resources, Identifier targetTexId, ObjectArrayList<AnimationMeta> anims) {
         try (java.io.InputStream targetTexResource = resources.getResource(targetTexId).getInputStream()) {
             return Optional.of(new AnimatedTexture(resources, anims, NativeImage.read(targetTexResource)));
         } catch (IOException e) { Animatica.LOG.error(e); }
@@ -47,7 +48,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
     }
 
     @SuppressWarnings("resource")
-    public AnimatedTexture(ResourceManager resources, @NotNull List<AnimationMeta> metas, @NotNull NativeImage image) throws IOException {
+    public AnimatedTexture(ResourceManager resources, @NotNull ObjectArrayList<AnimationMeta> metas, @NotNull NativeImage image) throws IOException {
         super(new NativeImage(image.getFormat(), image.getWidth(), image.getHeight(), true));
 
         this.anims = new Animation[metas.size()];
@@ -61,7 +62,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
     }
 
     public boolean canLoop() {
-        for (Animation anim : anims) {
+        for (Animation anim : this.anims) {
             if (!anim.isOnFrameZero()) {
                 return false;
             }
@@ -74,14 +75,14 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         boolean changed = false;
 
         if (canLoop()) {
-            if (frame > 0) {
-                frame = 0;
+            if (this.frame > 0) {
+                this.frame = 0;
             }
-        } else if (frame <= 0) {
+        } else if (this.frame <= 0) {
             changed = true;
         }
 
-        for (Animation anim : anims) {
+        for (Animation anim : this.anims) {
             if (anim.isChanged()) {
                 changed = true;
                 break;
@@ -92,7 +93,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             image.copyFrom(this.original);
 
             Phase phase;
-            for (Animation anim : anims) {
+            for (Animation anim : this.anims) {
                 phase = anim.getCurrentPhase();
                 if (phase instanceof InterpolatedPhase) {
                     InterpolatedPhase iPhase = (InterpolatedPhase)phase;
@@ -103,10 +104,10 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             }
         }
 
-        for (Animation anim : anims) {
+        for (Animation anim : this.anims) {
             anim.advance();
         }
-        frame++;
+        this.frame++;
 
         return changed;
     }
@@ -119,7 +120,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
 
     @Override
     public void close() {
-        for (Animation anim : anims) {
+        for (Animation anim : this.anims) {
             anim.close();
         }
 
@@ -129,7 +130,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
 
     // Represents an active animation from an animation meta file; progresses through phases while being drawn
     public static class Animation implements AutoCloseable {
-        private final List<Phase> phases;
+        private final ObjectList<Phase> phases;
         public final NativeImage sourceTexture;
         public final int targetX;
         public final int targetY;
@@ -149,27 +150,26 @@ public class AnimatedTexture extends NativeImageBackedTexture {
             this.width = meta.width();
             this.height = meta.height();
 
-            try (java.io.InputStream source = resources.getResource(meta.source()).getInputStream()) {
+            try (InputStream source = resources.getResource(meta.source()).getInputStream()) {
                 this.sourceTexture = NativeImage.read(source);
             }
 
-            ObjectList<Phase> phases = new ObjectArrayList<>();
+            ObjectArrayList<Phase> phases = new ObjectArrayList<>();
             int duration = 0;
 
-            final int textureFrameCount = (int)Math.floor((float) sourceTexture.getHeight() / meta.height());
+            final int textureFrameCount = (int)Math.floor((float) this.sourceTexture.getHeight() / meta.height());
             final int animFrameCount = Math.max(textureFrameCount, meta.getGreatestUsedFrame() + 1);
+            final Int2IntMap frameMapping = meta.frameMapping();
+            final Int2IntMap frameDurations = meta.frameDurations();
+            final boolean interpolate = meta.interpolate();
+            final int interpolationDelay = meta.interpolationDelay();
+            final int defaultFrameDuration = meta.defaultFrameDuration();
 
             // The int array stored for each frame must contain the frame mapping and duration
-            List<int[]> frames = new ObjectArrayList<>();
+            ObjectArrayList<int[]> frames = new ObjectArrayList<>();
             for (int f = 0; f < animFrameCount; f++) {
-                if (f >= textureFrameCount && !meta.frameMapping().containsKey(f)) {
-                    continue;
-                }
-
-                frames.add(new int[] {
-                        meta.frameMapping().getOrDefault(f, f),
-                        meta.frameDurations().getOrDefault(f, meta.defaultFrameDuration())
-                });
+                if (f >= textureFrameCount && !frameMapping.containsKey(f)) continue;
+                frames.add(new int[] {frameMapping.getOrDefault(f, f), frameDurations.getOrDefault(f, defaultFrameDuration)});
             }
 
             for (int i = 0; i < frames.size(); i++) {
@@ -181,15 +181,15 @@ public class AnimatedTexture extends NativeImageBackedTexture {
                 int v = getVForFrame(fMap, textureFrameCount);
                 int nextV = getVForFrame(frames.get(Math.floorMod(i + 1, frames.size()))[0], textureFrameCount);
 
-                if (meta.interpolate()) {
-                    if (meta.interpolationDelay() > 0) {
+                if (interpolate) {
+                    if (interpolationDelay > 0) {
                         // Adds a static version of the current phase as a "delay" before the next interpolated phase (if specified in animation)
-                        phases.add(new Phase(meta.interpolationDelay(), v));
-                        duration += meta.interpolationDelay();
+                        phases.add(new Phase(interpolationDelay, v));
+                        duration += interpolationDelay;
                     }
 
                     // Add interpolated animation phase
-                    final int interpolatedDuration = fDuration - meta.interpolationDelay();
+                    final int interpolatedDuration = fDuration - interpolationDelay;
                     phases.add(new InterpolatedPhase(interpolatedDuration, v, nextV, (phaseFrame) -> ((float) phaseFrame / interpolatedDuration)));
                     duration += interpolatedDuration;
                 } else {
@@ -205,17 +205,17 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         }
 
         public void updateCurrentPhase() {
-            changed = false;
-            int progress = frame;
+            this.changed = false;
+            int progress = this.frame;
 
-            for (Phase phase : phases) {
+            for (Phase phase : this.phases) {
                 progress -= phase.duration; // Take away as much progress as each phase is long, until progress is below zero
                 if (progress < 0) {
-                    if (currentPhase != phase) {
+                    if (this.currentPhase != phase) {
                         // Marks baking anim as changed should it be in a new, unique phase
-                        changed = true;
+                        this.changed = true;
                     }
-                    if (phase instanceof InterpolatedPhase) changed = ((InterpolatedPhase)phase).hasChangingV(); // Marks baking anim as changed should its current phase be changing
+                    if (phase instanceof InterpolatedPhase) this.changed = ((InterpolatedPhase)phase).hasChangingV(); // Marks baking anim as changed should its current phase be changing
 
                     this.currentPhase = phase;
                     this.phaseFrame = phase.duration + progress; // Adding progress to the phase duration results in how far it is into the phase
@@ -226,25 +226,25 @@ public class AnimatedTexture extends NativeImageBackedTexture {
         }
 
         public Phase getCurrentPhase() {
-            return currentPhase;
+            return this.currentPhase;
         }
 
         public int getPhaseFrame() {
-            return phaseFrame;
+            return this.phaseFrame;
         }
 
         public boolean isOnFrameZero() {
-            return frame <= 0;
+            return this.frame <= 0;
         }
 
         public boolean isChanged() {
-            return changed;
+            return this.changed;
         }
 
         public void advance() {
-            frame++;
-            if (frame >= duration) {
-                frame = 0;
+            this.frame++;
+            if (this.frame >= this.duration) {
+                this.frame = 0;
             }
             updateCurrentPhase();
         }
@@ -273,7 +273,7 @@ public class AnimatedTexture extends NativeImageBackedTexture {
 
         @Override
         public String toString() {
-            return "Animation Bakery Phase { v: "+this.v+" }";
+            return "Animation Bakery Phase { v: " + this.v + " }";
         }
     }
 

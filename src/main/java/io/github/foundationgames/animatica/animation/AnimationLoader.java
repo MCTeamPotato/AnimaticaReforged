@@ -30,10 +30,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Consumer;
 
 @SuppressWarnings("deprecation")
@@ -46,8 +43,8 @@ public final class AnimationLoader implements SynchronousResourceReloader {
 
     public static final AnimationLoader INSTANCE = new AnimationLoader();
 
-    private final Map<Identifier, Identifier> animationIds = new Object2ObjectOpenHashMap<>();
-    private final Set<AnimatedTexture> animatedTextures = new ObjectOpenHashSet<>();
+    private final Object2ObjectOpenHashMap<Identifier, Identifier> animationIds = new Object2ObjectOpenHashMap<>();
+    private final ObjectOpenHashSet<AnimatedTexture> animatedTextures = new ObjectOpenHashSet<>();
 
     private AnimationLoader() {
     }
@@ -59,14 +56,14 @@ public final class AnimationLoader implements SynchronousResourceReloader {
     }
 
     public @Nullable Identifier getAnimationId(Identifier id) {
-        return animationIds.get(id);
+        return this.animationIds.get(id);
     }
 
     public void tickTextures() {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(this::tickTextures);
         } else {
-            for (AnimatedTexture texture : animatedTextures) {
+            for (AnimatedTexture texture : this.animatedTextures) {
                 texture.tick();
             }
         }
@@ -83,7 +80,7 @@ public final class AnimationLoader implements SynchronousResourceReloader {
 
         Animatica.ALLOW_INVALID_ID_CHARS = true;
 
-        Map<Identifier, List<AnimationMeta>> animations = new Object2ObjectOpenHashMap<>();
+        Object2ObjectOpenHashMap<Identifier, ObjectArrayList<AnimationMeta>> animations = new Object2ObjectOpenHashMap<>();
 
         findAllMCPAnimations(manager, id -> {
             try {

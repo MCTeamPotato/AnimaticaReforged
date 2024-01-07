@@ -20,6 +20,7 @@ package io.github.foundationgames.animatica.util;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
 import io.github.foundationgames.animatica.util.exception.MissingPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMaps;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.minecraft.client.texture.NativeImage;
@@ -28,7 +29,6 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Map;
 import java.util.Properties;
 
 public final class Utilities {
@@ -101,7 +101,7 @@ public final class Utilities {
         throw new InvalidPropertyException(file, key, "boolean (false/true)");
     }
 
-    public static @Unmodifiable @NotNull Map<Integer, Integer> intToIntMap(@NotNull Properties in) {
+    public static @Unmodifiable @NotNull Int2IntMap intToIntMap(@NotNull Properties in) {
         Int2IntOpenHashMap map = new Int2IntOpenHashMap();
         for (String k : in.stringPropertyNames()) {
             try {

@@ -21,12 +21,12 @@ import com.teampotato.potacore.iteration.MergedIterable;
 import io.github.foundationgames.animatica.util.Utilities;
 import io.github.foundationgames.animatica.util.exception.InvalidPropertyException;
 import io.github.foundationgames.animatica.util.exception.PropertyParseException;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.InvalidIdentifierException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.Properties;
 
 public class AnimationMeta {
@@ -39,12 +39,12 @@ public class AnimationMeta {
     private final int defaultFrameDuration;
     private final boolean interpolate;
     private final int interpolationDelay;
-    private final Map<Integer, Integer> frameMapping;
-    private final Map<Integer, Integer> frameDurations;
+    private final Int2IntMap frameMapping;
+    private final Int2IntMap frameDurations;
 
     public AnimationMeta(Identifier source, Identifier target, int targetX, int targetY, int width, int height,
                          int defaultFrameDuration, boolean interpolate, int interpolationDelay,
-                         Map<Integer, Integer> frameMapping, Map<Integer, Integer> frameDurations) {
+                         Int2IntMap frameMapping, Int2IntMap frameDurations) {
         this.source = source;
         this.target = target;
         this.targetX = targetX;
@@ -89,7 +89,7 @@ public class AnimationMeta {
 
     public int getGreatestUsedFrame() {
         int greatestFrame = 0;
-        for (int frame : new MergedIterable<>(frameMapping.keySet(), frameDurations.keySet())) {
+        for (int frame : new MergedIterable<>(this.frameMapping.keySet(), this.frameDurations.keySet())) {
             greatestFrame = Math.max(frame, greatestFrame);
         }
 
@@ -98,46 +98,46 @@ public class AnimationMeta {
 
     // Getter methods for the fields go here
     public Identifier source() {
-        return source;
+        return this.source;
     }
 
     public Identifier target() {
-        return target;
+        return this.target;
     }
 
     public int targetX() {
-        return targetX;
+        return this.targetX;
     }
 
     public int targetY() {
-        return targetY;
+        return this.targetY;
     }
 
     public int width() {
-        return width;
+        return this.width;
     }
 
     public int height() {
-        return height;
+        return this.height;
     }
 
     public int defaultFrameDuration() {
-        return defaultFrameDuration;
+        return this.defaultFrameDuration;
     }
 
     public boolean interpolate() {
-        return interpolate;
+        return this.interpolate;
     }
 
     public int interpolationDelay() {
-        return interpolationDelay;
+        return this.interpolationDelay;
     }
 
-    public Map<Integer, Integer> frameMapping() {
-        return frameMapping;
+    public Int2IntMap frameMapping() {
+        return this.frameMapping;
     }
 
-    public Map<Integer, Integer> frameDurations() {
-        return frameDurations;
+    public Int2IntMap frameDurations() {
+        return this.frameDurations;
     }
 }

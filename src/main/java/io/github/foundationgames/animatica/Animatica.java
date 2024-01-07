@@ -49,6 +49,7 @@ public class Animatica {
         ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
         if (resourceManager instanceof ReloadableResourceManager) ((ReloadableResourceManager)resourceManager).registerReloader(AnimationLoader.INSTANCE);
     }
+
     public static final ForgeConfigSpec CONFIG;
     public static final ForgeConfigSpec.BooleanValue ANIMATED_TEXTURES;
 
