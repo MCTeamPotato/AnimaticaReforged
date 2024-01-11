@@ -78,8 +78,6 @@ public final class AnimationLoader implements SynchronousResourceReloader {
             return;
         }
 
-        Animatica.ALLOW_INVALID_ID_CHARS = true;
-
         Object2ObjectOpenHashMap<Identifier, ObjectArrayList<AnimationMeta>> animations = new Object2ObjectOpenHashMap<>();
 
         findAllMCPAnimations(manager, id -> {
@@ -108,7 +106,5 @@ public final class AnimationLoader implements SynchronousResourceReloader {
                         tex.registerTexture(MinecraftClient.getInstance().getTextureManager(), manager, animId, MinecraftClient.getInstance());
                     });
         }
-
-        Animatica.ALLOW_INVALID_ID_CHARS = false;
     }
 }

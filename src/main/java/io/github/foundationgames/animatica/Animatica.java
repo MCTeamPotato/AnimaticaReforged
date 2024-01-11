@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
 public class Animatica {
     public static final Logger LOG = LogManager.getLogger("Animatica");
     public static final String NAMESPACE = "animatica";
-    public static volatile boolean ALLOW_INVALID_ID_CHARS = false;
 
     public Animatica() {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
