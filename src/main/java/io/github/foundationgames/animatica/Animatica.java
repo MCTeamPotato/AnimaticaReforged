@@ -37,8 +37,6 @@ public class Animatica {
     public static final Logger LOG = LogManager.getLogger("Animatica");
     public static final String NAMESPACE = "animatica";
 
-    public static volatile boolean ALLOW_INVALID_ID_CHARS = false;
-
     public Animatica() {
         ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CONFIG);
